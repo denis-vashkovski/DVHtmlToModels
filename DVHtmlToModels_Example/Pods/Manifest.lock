@@ -1,0 +1,21 @@
+PODS:
+  - hpple (0.3.0)
+
+DEPENDENCIES:
+  - hpple (from `https://github.com/topfunky/hpple.git`)
+
+EXTERNAL SOURCES:
+  hpple:
+    :git: https://github.com/topfunky/hpple.git
+
+CHECKOUT OPTIONS:
+  hpple:
+    :commit: dd7f4cd029f3ffea3dfac4c7e7239761df1c7d25
+    :git: https://github.com/topfunky/hpple.git
+
+SPEC CHECKSUMS:
+  hpple: 7a5d0f10f5bd0d9382382110fc1be54bb7b86e4e
+
+PODFILE CHECKSUM: ef612a007122cf054e389751375a2d1706e02790
+
+COCOAPODS: 1.0.0.beta.3
