@@ -15,5 +15,6 @@
 @property (nonatomic, strong) NSString *title;
 @property (nonatomic, strong) NSString *photoUrl;
 @property (nonatomic, strong) NSString *author;
+@property (nonatomic, strong) NSDate *createdAt;
 @property (nonatomic, strong) PriceObject *price;
 @end

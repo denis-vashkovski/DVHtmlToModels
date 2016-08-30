@@ -17,11 +17,12 @@
 #pragma mark -
 #pragma mark NSObject+DVHtmlToModels_Private
 @interface NSObject(DVHtmlToModels_Private)
+- (Class)dv_getTypeClassOfPropertyByName:(NSString *)propertyName;
 - (void)dv_setValue:(id)value forPropertyName:(NSString *)propertyName;
 @end
 @implementation NSObject(DVHtmlToModels_Private)
 - (NSString *)getTypeAttributePropertyByName:(NSString *)propertyName {
-    if (!propertyName || propertyName.length == 0) {
+    if (propertyName && (propertyName.length > 0)) {
         objc_property_t propTitle = class_getProperty([self class], [propertyName UTF8String]);
         
         if (propTitle) {
@@ -164,8 +165,8 @@
     for (DVContextObject *object in _objects) {
         NSArray *dataArray = [self prepareContextObject:object parser:htmlParser];
         
-        if (dataArray.count > 0) {
-            [preparedData setObject:[NSArray arrayWithArray:dataArray] forKey:object.className];
+        if (valid(dataArray)) {
+            [preparedData setObject:dataArray forKey:object.className];
         }
     }
     
@@ -183,9 +184,14 @@
         for (DVContextField *field in object.fields) {
             for (DVContextResult *result in field.result) {
                 if (result.object) {
-                    id valueObject = [self prepareContextObject:result.object parser:element];
-                    if (valueObject) {
-                        [modelObject dv_setValue:valueObject forPropertyName:field.name];
+                    id valueObjectArray = [self prepareContextObject:result.object parser:element];
+                    if (valid(valueObjectArray)) {
+                        if (![[modelObject dv_getTypeClassOfPropertyByName:field.name] isSubclassOfClass:[NSArray class]]) {
+                            valueObjectArray = ((NSArray *)valueObjectArray).firstObject;
+                        }
+                        
+                        [modelObject dv_setValue:valueObjectArray forPropertyName:field.name];
+                        
                         break;
                     }
                 } else {
@@ -211,8 +217,25 @@
                                 }
                                 
                                 if (executeFormat) {
-                                    resultValue = [NSString stringWithFormat:format.format, resultValue];
+                                    switch (format.type) {
+                                        case DVContextFormatTypeDate:{
+                                            if ([[modelObject dv_getTypeClassOfPropertyByName:field.name] isSubclassOfClass:[NSDate class]]) {
+                                                NSDateFormatter *df = [NSDateFormatter new];
+                                                [df setDateFormat:format.format];
+                                                
+                                                [modelObject dv_setValue:[df dateFromString:resultValue] forPropertyName:field.name];
+                                                resultValue = nil;
+                                            }
+                                            break;
+                                        }
+                                        default:{
+                                            resultValue = [NSString stringWithFormat:format.format, resultValue];
+                                            break;
+                                        }
+                                    }
                                 }
+                                
+                                if (!resultValue) break;
                             }
                             
                             if (valid(resultValue)) {

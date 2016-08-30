@@ -137,6 +137,26 @@
                                         </dict>
                                         <dict>
                                             <key>name</key>
+                                            <string>createdAt</string>
+                                            <key>result</key>
+                                            <array>
+                                                <dict>
+                                                    <key>xPath</key>
+                                                    <string>//div[@id='date']/a</string>
+                                                    <key>formats</key>
+                                                    <array>
+                                                        <dict>
+                                                            <key>type</key>
+                                                            <string>date</string>
+                                                            <key>format</key>
+                                                            <string>dd.MM.yyyy</string>
+                                                        </dict>
+                                                    </array>
+                                                </dict>
+                                            </array>
+                                        </dict>
+                                        <dict>
+                                            <key>name</key>
                                             <string>price</string>
                                             <key>result</key>
                                             <array>

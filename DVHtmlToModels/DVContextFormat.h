@@ -10,9 +10,15 @@
 
 #import "DVContextCondition.h"
 
+typedef enum {
+    DVContextFormatTypeDefault,
+    DVContextFormatTypeDate
+} DVContextFormatType;
+
 @interface DVContextFormat : NSObject
 - (instancetype)initWithData:(NSDictionary *)data;
 
+@property (nonatomic, assign, readonly) DVContextFormatType type;
 @property (nonatomic, strong, readonly) NSArray<DVContextCondition *> *conditions;
 @property (nonatomic, strong, readonly) NSString *format;
 @end

@@ -10,6 +10,15 @@
 
 @implementation DVContextFormat
 
+- (DVContextFormatType)typeByString:(NSString *)typeStr {
+    if ([typeStr isEqualToString:@"date"]) {
+        return DVContextFormatTypeDate;
+    } else {
+        return DVContextFormatTypeDefault;
+    }
+}
+
+#define TYPE_KEY @"type"
 #define CONDITIONS_KEY @"conditions"
 #define FORMAT_KEY @"format"
 - (instancetype)initWithData:(NSDictionary *)data {
@@ -17,6 +26,8 @@
         return nil;
     }
     if (self = [super init]) {
+        _type = [self typeByString:data[TYPE_KEY]];
+        
         id conditionsData = data[CONDITIONS_KEY];
         if (conditionsData && [conditionsData isKindOfClass:[NSArray class]]) {
             NSMutableArray<DVContextCondition *> *array = [NSMutableArray array];
