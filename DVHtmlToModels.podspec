@@ -9,4 +9,5 @@ Pod::Spec.new do |s|
   s.source              = { :git => 'https://github.com/denis-vashkovski/DVHtmlToModels.git', :tag => s.version.to_s }
   s.ios.source_files    = 'DVHtmlToModels/*.{h,m}'
   s.requires_arc        = true
+  s.ios.dependency      'hpple', :git => 'https://github.com/topfunky/hpple.git'
 end
