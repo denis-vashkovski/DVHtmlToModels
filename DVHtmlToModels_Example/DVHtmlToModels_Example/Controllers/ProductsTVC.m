@@ -37,7 +37,8 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Product Cell ID" forIndexPath:indexPath];
     
     ProductObject *product = self.products[indexPath.row];
-    [cell.textLabel setText:[NSString stringWithFormat:@"%ld\n%@\n%@\n%@\n%@\n%d\n%d\n%@",
+    [cell.textLabel setText:[NSString stringWithFormat:
+                             @"%ld\n%@\n%@\n%@\n%@\n%d\n%d\n%@",
                              product.uniqueId,
                              product.title,
                              product.photoUrl,

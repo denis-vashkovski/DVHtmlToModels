@@ -9,6 +9,14 @@
 #import <Foundation/Foundation.h>
 
 @interface DVHtmlToModels : NSObject
-- (void)prepareContextByName:(NSString *)contextName;
++ (instancetype) alloc __attribute__((unavailable("alloc not available, call initWithContextByName: instead")));
+- (instancetype) init __attribute__((unavailable("init not available, call initWithContextByName: instead")));
++ (instancetype) new __attribute__((unavailable("new not available, call initWithContextByName: instead")));
+
++ (instancetype)htmlToModelsWithContextByName:(NSString *)contextName;
+
+@property (nonatomic, strong, readonly) NSString *url;
+
+- (NSDictionary *)loadDataWithUrlParameters:(NSArray<NSString *> *)parameters;
 - (NSDictionary *)loadData;
 @end

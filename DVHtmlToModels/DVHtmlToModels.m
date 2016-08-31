@@ -15,13 +15,36 @@
 #import <objc/runtime.h>
 
 #pragma mark -
+#pragma mark NSString+DVHtmlToModels_Private
+@interface NSString(DVHtmlToModels_Private)
+@end
+@implementation NSString(DVHtmlToModels_Private)
+- (NSString *)dv_encodeForUrl {
+    const char *input_c = [self cStringUsingEncoding:NSUTF8StringEncoding];
+    NSMutableString *result = [NSMutableString new];
+    for (NSInteger i = 0, len = strlen(input_c); i < len; i++) {
+        unsigned char c = input_c[i];
+        if (
+            (c >= '0' && c <= '9')
+            || (c >= 'A' && c <= 'Z')
+            || (c >= 'a' && c <= 'z')
+            || c == '-' || c == '.' || c == '_' || c == '~'
+            ) {
+            [result appendFormat:@"%c", c];
+        } else {
+            [result appendFormat:@"%%%02X", c];
+        }
+    }
+    return result;
+}
+@end
+
+#pragma mark -
 #pragma mark NSObject+DVHtmlToModels_Private
 @interface NSObject(DVHtmlToModels_Private)
-- (Class)dv_getTypeClassOfPropertyByName:(NSString *)propertyName;
-- (void)dv_setValue:(id)value forPropertyName:(NSString *)propertyName;
 @end
 @implementation NSObject(DVHtmlToModels_Private)
-- (NSString *)getTypeAttributePropertyByName:(NSString *)propertyName {
+- (NSString *)dv_getTypeAttributePropertyByName:(NSString *)propertyName {
     if (propertyName && (propertyName.length > 0)) {
         objc_property_t propTitle = class_getProperty([self class], [propertyName UTF8String]);
         
@@ -38,7 +61,7 @@
 }
 
 - (Class)dv_getTypeClassOfPropertyByName:(NSString *)propertyName {
-    NSString *typeAttribute = [self getTypeAttributePropertyByName:propertyName];
+    NSString *typeAttribute = [self dv_getTypeAttributePropertyByName:propertyName];
     if (typeAttribute && [typeAttribute hasPrefix:@"T@"]) {
         NSString *typeClassName = [typeAttribute substringWithRange:NSMakeRange(3, [typeAttribute length] - 4)];
         return NSClassFromString(typeClassName);
@@ -78,7 +101,7 @@
             valuePrepared = @[valuePrepared];
         }
     } else if (!propertyClass) {
-        NSString *typeAttribute = [self getTypeAttributePropertyByName:propertyName];
+        NSString *typeAttribute = [self dv_getTypeAttributePropertyByName:propertyName];
         
         if (typeAttribute) {
             NSString *propertyType = [typeAttribute substringFromIndex:1];
@@ -113,7 +136,6 @@
 #pragma mark -
 #pragma mark DVHtmlToModels
 @interface DVHtmlToModels()
-@property (nonatomic, strong) NSString *url;
 @property (nonatomic, strong) NSArray<DVContextObject *> *objects;
 @end
 
@@ -121,10 +143,14 @@
 
 #define valid(value) [self validValue:(value)]
 
++ (instancetype)htmlToModelsWithContextByName:(NSString *)contextName {
+    return [[super alloc] initWithContextByName:contextName];
+}
+
 #define URL_KEY @"url"
 #define DATA_KEY @"data"
-- (void)prepareContextByName:(NSString *)contextName {
-    if (valid(contextName)) {
+- (instancetype)initWithContextByName:(NSString *)contextName {
+    if ((self = [super init]) && valid(contextName)) {
         NSString *filePath = [[NSBundle mainBundle] pathForResource:contextName ofType:@"plist"];
         
         if (valid(filePath)) {
@@ -147,19 +173,18 @@
             }
         }
     }
+    return self;
 }
 
-- (NSDictionary *)loadData {
+- (NSDictionary *)loadDataWithUrlParameters:(NSArray<NSString *> *)parameters {
     if (!valid(_url)) return nil;
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    NSData *htmlData = [NSData dataWithContentsOfURL:[NSURL URLWithString:_url]];
+    NSData *htmlData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[self preparedUrlWithParams:parameters]]];
     TFHpple *htmlParser = [TFHpple hppleWithHTMLData:htmlData];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     
-    if (!htmlParser) {
-        return nil;
-    }
+    if (!htmlParser) return nil;
     
     NSMutableDictionary<NSString *, NSArray *> *preparedData = [NSMutableDictionary new];
     for (DVContextObject *object in _objects) {
@@ -173,13 +198,17 @@
     return preparedData.count > 0 ? [NSDictionary dictionaryWithDictionary:preparedData] : nil;
 }
 
+- (NSDictionary *)loadData {
+    return [self loadDataWithUrlParameters:nil];
+}
+
 - (NSArray *)prepareContextObject:(DVContextObject *)object parser:(id)parser {
     NSArray<TFHppleElement *> *elements = valid(object.xPathRoot) ? [parser searchWithXPathQuery:object.xPathRoot] : nil;
     if (!valid(elements)) return nil;
     
     NSMutableArray *dataArray = [NSMutableArray new];
     for (TFHppleElement *element in elements) {
-        id modelObject = [NSClassFromString(object.className) new];
+        id modelObject = [objc_getClass(object.className.UTF8String) new];
         
         for (DVContextField *field in object.fields) {
             for (DVContextResult *result in field.result) {
@@ -276,6 +305,21 @@
             : ([value isKindOfClass:[NSArray class]]
                ? (value && [value isKindOfClass:[NSArray class]] && [((NSArray *)value) count])
                : NO));
+}
+
+- (NSString *)preparedUrlWithParams:(NSArray<NSString *> *)parameters {
+    NSString *preparedUrl = [NSString stringWithFormat:@"%@", _url];
+    
+    if (valid(preparedUrl) && valid(parameters)) {
+        for (NSString *parameter in parameters) {
+            NSRange rangeForParameter = [preparedUrl rangeOfString:@"%@"];
+            if (NSNotFound != rangeForParameter.location) {
+                preparedUrl = [preparedUrl stringByReplacingCharactersInRange:rangeForParameter withString:[parameter dv_encodeForUrl]];
+            }
+        }
+    }
+    
+    return preparedUrl;
 }
 
 @end

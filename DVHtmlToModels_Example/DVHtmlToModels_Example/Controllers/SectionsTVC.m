@@ -23,9 +23,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    DVHtmlToModels *htmlToModels = [DVHtmlToModels new];
-    [htmlToModels prepareContextByName:@"context_example"];
-    
+    DVHtmlToModels *htmlToModels = [DVHtmlToModels htmlToModelsWithContextByName:@"context_example"];
     NSDictionary *data = [htmlToModels loadData];
     if (data) {
         self.sections = data[NSStringFromClass([SectionObject class])];
@@ -33,7 +31,6 @@
 }
 
 #pragma mark - Table view data source
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
 }
@@ -65,7 +62,9 @@
     UIViewController *vc = segue.destinationViewController;
     if (!vc) return;
     
-    [((ProductsTVC *)vc) setProducts:self.sections[self.selectedIndexPath.row].products];
+    if ([vc isKindOfClass:[ProductsTVC class]]) {
+        [((ProductsTVC *)vc) setProducts:self.sections[self.selectedIndexPath.row].products];
+    }
 }
 
 @end
