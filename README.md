@@ -7,16 +7,21 @@ Parse html to models.
 
 ### iOS 7
 
-1.  Copying all the files from DVHtmlToModels folder into your project.
-2.  Make sure that the files are added to the Target membership.
+1.  Install [hpple](https://github.com/topfunky/hpple#installation)
+2.  Copying all the files from DVHtmlToModels folder into your project.
+3.  Make sure that the files are added to the Target membership.
 
 ### Using [CocoaPods](http://cocoapods.org)
 
-1.  Add the pod `DVHtmlToModels` to your [Podfile](http://guides.cocoapods.org/using/the-podfile.html).
+1.  Add the pod `hpple` to your [Podfile](http://guides.cocoapods.org/using/the-podfile.html).
+
+        pod 'hpple', :git => 'https://github.com/topfunky/hpple.git'
+        
+2.  Add the pod `DVHtmlToModels`.
 
         pod 'DVHtmlToModels', :git => 'https://github.com/denis-vashkovski/DVHtmlToModels.git'
 
-2.  Run `pod install` from Terminal, then open your app's `.xcworkspace` file to launch Xcode.
+3.  Run `pod install` from Terminal, then open your app's `.xcworkspace` file to launch Xcode.
 
 ## Basic Usage
 
