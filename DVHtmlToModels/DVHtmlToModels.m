@@ -234,42 +234,47 @@
                                 resultValue = [self prepareRegexPattern:result.regex forString:resultValue];
                             }
                             
-                            for (DVContextFormat *format in result.formats) {
-                                BOOL executeFormat = YES;
-                                for (DVContextCondition *condition in format.conditions) {
-                                    NSString *prepareString = [self prepareRegexPattern:condition.regex forString:resultValue];
-                                    
-                                    if (!valid(prepareString) && !condition.negative) {
-                                        executeFormat = NO;
-                                        break;
-                                    }
-                                }
-                                
-                                if (executeFormat) {
-                                    switch (format.type) {
-                                        case DVContextFormatTypeDate:{
-                                            if ([[modelObject dv_getTypeClassOfPropertyByName:field.name] isSubclassOfClass:[NSDate class]]) {
-                                                NSDateFormatter *df = [NSDateFormatter new];
-                                                [df setDateFormat:format.format];
-                                                
-                                                [modelObject dv_setValue:[df dateFromString:resultValue] forPropertyName:field.name];
-                                                resultValue = nil;
-                                            }
-                                            break;
-                                        }
-                                        default:{
-                                            resultValue = [NSString stringWithFormat:format.format, resultValue];
-                                            break;
-                                        }
-                                    }
-                                }
-                                
-                                if (!resultValue) break;
-                            }
-                            
                             if (valid(resultValue)) {
-                                [modelObject dv_setValue:resultValue forPropertyName:field.name];
-                                break;
+                                for (DVContextFormat *format in result.formats) {
+                                    BOOL executeFormat = YES;
+                                    for (DVContextCondition *condition in format.conditions) {
+                                        NSString *prepareString = [self prepareRegexPattern:condition.regex forString:resultValue];
+                                        
+                                        if (!valid(prepareString) && !condition.negative) {
+                                            executeFormat = NO;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (executeFormat) {
+                                        switch (format.type) {
+                                            case DVContextFormatTypeDate:{
+                                                if ([[modelObject dv_getTypeClassOfPropertyByName:field.name] isSubclassOfClass:[NSDate class]]) {
+                                                    NSDateFormatter *df = [NSDateFormatter new];
+                                                    [df setDateFormat:format.format];
+                                                    
+                                                    [modelObject dv_setValue:[df dateFromString:resultValue] forPropertyName:field.name];
+                                                    resultValue = nil;
+                                                }
+                                                break;
+                                            }
+                                            default:{
+                                                resultValue = [NSString stringWithFormat:format.format, resultValue];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (!resultValue) break;
+                                }
+                                
+                                if (valid(resultValue)) {
+                                    if (valid(result.value)) {
+                                        resultValue = result.value;
+                                    }
+                                    [modelObject dv_setValue:resultValue forPropertyName:field.name];
+                                    break;
+                                }
                             }
                         }
                     }

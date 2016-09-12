@@ -30,7 +30,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 160.f;
+    return 180.f;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -38,7 +38,7 @@
     
     ProductObject *product = self.products[indexPath.row];
     [cell.textLabel setText:[NSString stringWithFormat:
-                             @"%ld\n%@\n%@\n%@\n%@\n%d\n%d\n%@",
+                             @"%ld\n%@\n%@\n%@\n%@\n%d\n%d\n%@\n%d",
                              product.uniqueId,
                              product.title,
                              product.photoUrl,
@@ -46,7 +46,8 @@
                              product.createdAt,
                              product.price.discount,
                              product.price.price,
-                             product.price.currency]];
+                             product.price.currency,
+                             product.isNew]];
     
     return cell;
 }

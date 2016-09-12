@@ -204,6 +204,21 @@
 											</dict>
 										</array>
 									</dict>
+                                    <dict>
+                                        <key>name</key>
+                                        <string>isNew</string>
+                                        <key>result</key>
+                                        <array>
+                                            <dict>
+                                                <key>xPath</key>
+                                                <string>//div/p[@class=&apos;author&apos;]/span</string>
+                                                <key>regex</key>
+                                                <string>[^_]+_author_1_1</string>
+                                                <key>value</key>
+                                                <string>1</string>
+                                            </dict>
+                                        </array>
+                                    </dict>
 								</array>
 							</dict>
 						</dict>

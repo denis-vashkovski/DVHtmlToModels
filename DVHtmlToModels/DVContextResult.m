@@ -17,6 +17,7 @@
 #define REGEX_KEY @"regex"
 #define FORMATS_KEY @"formats"
 #define DATA_KEY @"data"
+#define VALUE_KEY @"value"
 - (instancetype)initWithData:(NSDictionary *)data {
     if (!data || (data.count <= 0)) {
         return nil;
@@ -42,6 +43,7 @@
         }
         
         _object = [[DVContextObject alloc] initWithContext:data[DATA_KEY]];
+        _value = data[VALUE_KEY];
     }
     return self;
 }

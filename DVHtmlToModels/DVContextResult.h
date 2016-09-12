@@ -20,6 +20,7 @@
 @property (nonatomic, strong, readonly) NSString *regex;
 @property (nonatomic, strong, readonly) NSArray<DVContextFormat *> *formats;
 @property (nonatomic, strong, readonly) DVContextObject *object;
+@property (nonatomic, strong, readonly) NSString *value;
 
 - (BOOL)isObject;
 @end
