@@ -77,6 +77,8 @@ Create a `.plist` context file.
 									<string>dd.MM.yyyy</string>
 								</dict>
 							</array>
+							<key>value</key>
+							<string>value1</string>
 						</dict>
 					</array>
 				</dict>
