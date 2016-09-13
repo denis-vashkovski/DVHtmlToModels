@@ -227,7 +227,11 @@
                     TFHppleElement *resultElement = [element searchWithXPathQuery:result.xPath].firstObject;
                     
                     if (resultElement) {
-                        NSString *resultValue = valid(result.attribute) ? [resultElement objectForKey:result.attribute] : resultElement.text;
+                        NSString *resultValue = (valid(result.attribute)
+                                                 ? [resultElement objectForKey:result.attribute]
+                                                 : (result.isAllText
+                                                    ? [self prepareRegexPattern:@"(<[^>]+>|\n|  +)" forString:resultElement.raw]
+                                                    : resultElement.text));
                         
                         if (resultValue) {
                             if (valid(result.regex)) {

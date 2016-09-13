@@ -21,6 +21,7 @@
 @property (nonatomic, strong, readonly) NSArray<DVContextFormat *> *formats;
 @property (nonatomic, strong, readonly) DVContextObject *object;
 @property (nonatomic, strong, readonly) NSString *value;
+@property (nonatomic, assign, readonly, getter=isAllText) BOOL allText;
 
 - (BOOL)isObject;
 @end

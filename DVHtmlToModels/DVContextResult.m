@@ -18,6 +18,7 @@
 #define FORMATS_KEY @"formats"
 #define DATA_KEY @"data"
 #define VALUE_KEY @"value"
+#define ALL_TEXT_KEY @"allText"
 - (instancetype)initWithData:(NSDictionary *)data {
     if (!data || (data.count <= 0)) {
         return nil;
@@ -44,6 +45,7 @@
         
         _object = [[DVContextObject alloc] initWithContext:data[DATA_KEY]];
         _value = data[VALUE_KEY];
+        _allText = [data[ALL_TEXT_KEY] boolValue];
     }
     return self;
 }
