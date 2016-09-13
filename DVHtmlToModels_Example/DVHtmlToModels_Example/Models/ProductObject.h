@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+#import "UniqueObject.h"
 #import "PriceObject.h"
 
-@interface ProductObject : NSObject
-@property (nonatomic) long uniqueId;
+@interface ProductObject : UniqueObject
 @property (nonatomic, strong) NSString *title;
 @property (nonatomic, strong) NSString *photoUrl;
 @property (nonatomic, strong) NSString *author;

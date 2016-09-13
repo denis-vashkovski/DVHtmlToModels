@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3572DC5FB62AC533568CA456 /* libPods-DVHtmlToModels_Example.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ED9856CB78A6D36446AD7264 /* libPods-DVHtmlToModels_Example.a */; };
+		414F2C031D883E5A00AA7DA2 /* UniqueObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 414F2C021D883E5A00AA7DA2 /* UniqueObject.m */; };
 		416F9EDC1D756FC5002A0311 /* SectionsTVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 416F9EDB1D756FC5002A0311 /* SectionsTVC.m */; };
 		416F9EE11D7571CA002A0311 /* ProductsTVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 416F9EE01D7571CA002A0311 /* ProductsTVC.m */; };
 		41C4BA901D74697500C0FF09 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C4BA8F1D74697500C0FF09 /* main.m */; };
@@ -28,6 +29,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		414F2C011D883E5A00AA7DA2 /* UniqueObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UniqueObject.h; path = Models/UniqueObject.h; sourceTree = "<group>"; };
+		414F2C021D883E5A00AA7DA2 /* UniqueObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UniqueObject.m; path = Models/UniqueObject.m; sourceTree = "<group>"; };
 		416F9EDA1D756FC5002A0311 /* SectionsTVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SectionsTVC.h; path = Controllers/SectionsTVC.h; sourceTree = "<group>"; };
 		416F9EDB1D756FC5002A0311 /* SectionsTVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SectionsTVC.m; path = Controllers/SectionsTVC.m; sourceTree = "<group>"; };
 		416F9EDF1D7571CA002A0311 /* ProductsTVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProductsTVC.h; path = Controllers/ProductsTVC.h; sourceTree = "<group>"; };
@@ -185,6 +188,8 @@
 		41C4BABD1D7485E100C0FF09 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				414F2C011D883E5A00AA7DA2 /* UniqueObject.h */,
+				414F2C021D883E5A00AA7DA2 /* UniqueObject.m */,
 				41C4BAC11D74861500C0FF09 /* SectionObject.h */,
 				41C4BAC21D74861500C0FF09 /* SectionObject.m */,
 				41C4BAC41D74866100C0FF09 /* ProductObject.h */,
@@ -335,6 +340,7 @@
 				416F9EDC1D756FC5002A0311 /* SectionsTVC.m in Sources */,
 				41C4BAA71D7469C600C0FF09 /* DVContextObject.m in Sources */,
 				41C4BAC01D7485FB00C0FF09 /* PriceObject.m in Sources */,
+				414F2C031D883E5A00AA7DA2 /* UniqueObject.m in Sources */,
 				41C4BAC31D74861500C0FF09 /* SectionObject.m in Sources */,
 				41C4BAC61D74866100C0FF09 /* ProductObject.m in Sources */,
 				41C4BA901D74697500C0FF09 /* main.m in Sources */,
