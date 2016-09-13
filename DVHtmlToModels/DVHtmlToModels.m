@@ -230,7 +230,7 @@
                         NSString *resultValue = (valid(result.attribute)
                                                  ? [resultElement objectForKey:result.attribute]
                                                  : (result.isAllText
-                                                    ? [self prepareRegexPattern:@"(<[^>]+>|\n|  +)" forString:resultElement.raw]
+                                                    ? [self removeRegexPattern:@"(<[^>]+>|\n|  +)" fromString:resultElement.raw]
                                                     : resultElement.text));
                         
                         if (resultValue) {
@@ -329,6 +329,22 @@
     }
     
     return preparedUrl;
+}
+
+- (NSString *)removeRegexPattern:(NSString *)pattern fromString:(NSString *)string {
+    NSString *prepareString = [NSString stringWithFormat:@"%@", string];
+    
+    NSError *error = nil;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern
+                                                                           options:NSRegularExpressionCaseInsensitive
+                                                                             error:&error];
+    prepareString = [regex stringByReplacingMatchesInString:prepareString
+                                                    options:0
+                                                      range:NSMakeRange(0, [prepareString length])
+                                               withTemplate:@""];
+    prepareString = [prepareString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
+    return prepareString;
 }
 
 @end
