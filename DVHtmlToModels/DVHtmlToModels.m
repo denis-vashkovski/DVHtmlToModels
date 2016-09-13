@@ -319,7 +319,7 @@
         for (NSString *parameter in parameters) {
             NSRange rangeForParameter = [preparedUrl rangeOfString:@"%@"];
             if (NSNotFound != rangeForParameter.location) {
-                preparedUrl = [preparedUrl stringByReplacingCharactersInRange:rangeForParameter withString:[parameter dv_encodeForUrl]];
+                preparedUrl = [preparedUrl stringByReplacingCharactersInRange:rangeForParameter withString:parameter];
             }
         }
     }
