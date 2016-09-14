@@ -12,13 +12,23 @@
 
 @implementation DVContextResult
 
+- (DVTextType)textTypeByString:(NSString *)string {
+    if ([string isEqualToString:@"all"]) {
+        return DVTextTypeAll;
+    } else if ([string isEqualToString:@"raw"]) {
+        return DVTextTypeRaw;
+    } else {
+        return DVTextTypeDefault;
+    }
+}
+
 #define XPATH_KEY @"xPath"
 #define ATTRIBUTE_KEY @"attribute"
 #define REGEX_KEY @"regex"
 #define FORMATS_KEY @"formats"
 #define DATA_KEY @"data"
 #define VALUE_KEY @"value"
-#define ALL_TEXT_KEY @"allText"
+#define TEXT_TYPE_KEY @"textType"
 - (instancetype)initWithData:(NSDictionary *)data {
     if (!data || (data.count <= 0)) {
         return nil;
@@ -45,7 +55,7 @@
         
         _object = [[DVContextObject alloc] initWithContext:data[DATA_KEY]];
         _value = data[VALUE_KEY];
-        _allText = [data[ALL_TEXT_KEY] boolValue];
+        _textType = [self textTypeByString:data[TEXT_TYPE_KEY]];
     }
     return self;
 }

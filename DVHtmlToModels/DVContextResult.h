@@ -12,6 +12,12 @@
 
 @class DVContextObject;
 
+typedef enum {
+    DVTextTypeDefault,
+    DVTextTypeAll,
+    DVTextTypeRaw
+} DVTextType;
+
 @interface DVContextResult : NSObject
 - (instancetype)initWithData:(NSDictionary *)data;
 
@@ -21,7 +27,7 @@
 @property (nonatomic, strong, readonly) NSArray<DVContextFormat *> *formats;
 @property (nonatomic, strong, readonly) DVContextObject *object;
 @property (nonatomic, strong, readonly) NSString *value;
-@property (nonatomic, assign, readonly, getter=isAllText) BOOL allText;
+@property (nonatomic, assign, readonly) DVTextType textType;
 
 - (BOOL)isObject;
 @end
