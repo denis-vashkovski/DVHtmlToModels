@@ -246,7 +246,7 @@
                                     resultValue = [self removeRegexPattern:@"(<[^>]+>|\n|  +)" fromString:resultElement.raw];
                                     break;
                                 case DVTextTypeRaw:
-                                    resultValue = resultElement.raw;
+                                    resultValue = [self removeRegexPattern:@"(^<[^>]+>|<[^>]+>$)" fromString:resultElement.raw];
                                     break;
                                 default:
                                     resultValue = resultElement.text;
