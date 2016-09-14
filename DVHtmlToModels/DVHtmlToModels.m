@@ -236,17 +236,22 @@
                     TFHppleElement *resultElement = [element searchWithXPathQuery:result.xPath].firstObject;
                     
                     if (resultElement) {
-                        NSString *resultValue = valid(result.attribute) ? [resultElement objectForKey:result.attribute] : nil;
-                        switch (result.textType) {
-                            case DVTextTypeAll:
-                                resultValue = [self removeRegexPattern:@"(<[^>]+>|\n|  +)" fromString:resultElement.raw];
-                                break;
-                            case DVTextTypeRaw:
-                                resultValue = resultElement.raw;
-                                break;
-                            default:
-                                resultValue = resultElement.text;
-                                break;
+                        NSString *resultValue = nil;
+                        
+                        if (valid(result.attribute)) {
+                            resultValue = [resultElement objectForKey:result.attribute];
+                        } else {
+                            switch (result.textType) {
+                                case DVTextTypeAll:
+                                    resultValue = [self removeRegexPattern:@"(<[^>]+>|\n|  +)" fromString:resultElement.raw];
+                                    break;
+                                case DVTextTypeRaw:
+                                    resultValue = resultElement.raw;
+                                    break;
+                                default:
+                                    resultValue = resultElement.text;
+                                    break;
+                            }
                         }
                         
                         if (resultValue) {
