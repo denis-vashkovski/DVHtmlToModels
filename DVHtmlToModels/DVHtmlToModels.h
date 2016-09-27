@@ -14,6 +14,12 @@
 + (instancetype) new __attribute__((unavailable("new not available, call initWithContextByName: instead")));
 
 + (instancetype)htmlToModelsWithContextByName:(NSString *)contextName;
++ (instancetype)htmlToModelsWithContextOfFile:(NSString *)path;
++ (instancetype)htmlToModelsWithContext:(NSDictionary *)context;
+
+- (instancetype)initWithContextByName:(NSString *)contextName;
+- (instancetype)initWithContextOfFile:(NSString *)path;
+- (instancetype)initWithContext:(NSDictionary *)context;
 
 @property (nonatomic, strong, readonly) NSString *url;
 

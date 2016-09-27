@@ -156,30 +156,41 @@
     return [[super alloc] initWithContextByName:contextName];
 }
 
++ (instancetype)htmlToModelsWithContextOfFile:(NSString *)path {
+    return [[super alloc] initWithContextOfFile:path];
+}
+
++ (instancetype)htmlToModelsWithContext:(NSDictionary *)context {
+    return [[super alloc] initWithContext:context];
+}
+
+- (instancetype)initWithContextByName:(NSString *)contextName {
+    return valid(contextName) ?  [self initWithContextOfFile:[[NSBundle mainBundle] pathForResource:contextName ofType:@"plist"]] : [super init];
+}
+
+- (instancetype)initWithContextOfFile:(NSString *)path {
+    return valid(path) ? [self initWithContext:[NSDictionary dictionaryWithContentsOfFile:path]] : [super init];
+}
+
 #define URL_KEY @"url"
 #define DATA_KEY @"data"
-- (instancetype)initWithContextByName:(NSString *)contextName {
-    if ((self = [super init]) && valid(contextName)) {
-        NSString *filePath = [[NSBundle mainBundle] pathForResource:contextName ofType:@"plist"];
+- (instancetype)initWithContext:(NSDictionary *)context {
+    if ((self = [super init]) && valid(context)) {
+        _url = context[URL_KEY];
         
-        if (valid(filePath)) {
-            NSDictionary *context = [NSDictionary dictionaryWithContentsOfFile:filePath];
-            _url = context[URL_KEY];
+        id objectsData = context[DATA_KEY];
+        if (objectsData && [objectsData isKindOfClass:[NSArray class]]) {
+            NSMutableArray<DVContextObject *> *array = [NSMutableArray array];
             
-            id objectsData = context[DATA_KEY];
-            if (objectsData && [objectsData isKindOfClass:[NSArray class]]) {
-                NSMutableArray<DVContextObject *> *array = [NSMutableArray array];
+            for (NSDictionary *objectData in objectsData) {
+                DVContextObject *object = [[DVContextObject alloc] initWithContext:objectData];
                 
-                for (NSDictionary *objectData in objectsData) {
-                    DVContextObject *object = [[DVContextObject alloc] initWithContext:objectData];
-                    
-                    if (object) {
-                        [array addObject:object];
-                    }
+                if (object) {
+                    [array addObject:object];
                 }
-                
-                _objects = (array.count > 0) ? [NSArray arrayWithArray:array] : nil;
             }
+            
+            _objects = (array.count > 0) ? [NSArray arrayWithArray:array] : nil;
         }
     }
     return self;
@@ -334,7 +345,9 @@
             ? (value && [value isKindOfClass:[NSString class]] && [value length])
             : ([value isKindOfClass:[NSArray class]]
                ? (value && [value isKindOfClass:[NSArray class]] && [((NSArray *)value) count])
-               : NO));
+               : ([value isKindOfClass:[NSDictionary class]]
+                  ? (value && [value isKindOfClass:[NSDictionary class]] && [((NSDictionary *)value) count])
+                  : NO)));
 }
 
 - (NSString *)preparedUrlWithParams:(NSArray<NSString *> *)parameters {
