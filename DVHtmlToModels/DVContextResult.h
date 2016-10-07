@@ -28,6 +28,8 @@ typedef enum {
 @property (nonatomic, strong, readonly) DVContextObject *object;
 @property (nonatomic, strong, readonly) NSString *value;
 @property (nonatomic, assign, readonly) DVTextType textType;
+@property (nonatomic, strong, readonly) NSArray<DVContextResult *> *results;
+@property (nonatomic, strong, readonly) NSString *separator;
 
 - (BOOL)isObject;
 @end

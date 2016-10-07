@@ -13,6 +13,8 @@
 - (DVContextFormatType)typeByString:(NSString *)typeStr {
     if ([typeStr isEqualToString:@"date"]) {
         return DVContextFormatTypeDate;
+    } else if ([typeStr isEqualToString:@"replace"]) {
+        return DVContextFormatTypeReplace;
     } else {
         return DVContextFormatTypeDefault;
     }
@@ -20,6 +22,7 @@
 
 #define TYPE_KEY @"type"
 #define CONDITIONS_KEY @"conditions"
+#define REGEX_KEY @"regex"
 #define FORMAT_KEY @"format"
 - (instancetype)initWithData:(NSDictionary *)data {
     if (!data || (data.count <= 0)) {
@@ -43,6 +46,7 @@
             _conditions = (array.count > 0) ? [NSArray arrayWithArray:array] : nil;
         }
         
+        _regex = data[REGEX_KEY];
         _format = data[FORMAT_KEY];
     }
     return self;

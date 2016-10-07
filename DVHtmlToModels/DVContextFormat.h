@@ -12,7 +12,8 @@
 
 typedef enum {
     DVContextFormatTypeDefault,
-    DVContextFormatTypeDate
+    DVContextFormatTypeDate,
+    DVContextFormatTypeReplace
 } DVContextFormatType;
 
 @interface DVContextFormat : NSObject
@@ -20,5 +21,6 @@ typedef enum {
 
 @property (nonatomic, assign, readonly) DVContextFormatType type;
 @property (nonatomic, strong, readonly) NSArray<DVContextCondition *> *conditions;
+@property (nonatomic, strong, readonly) NSString *regex;
 @property (nonatomic, strong, readonly) NSString *format;
 @end

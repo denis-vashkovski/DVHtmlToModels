@@ -45,15 +45,7 @@
 										<array>
 											<dict>
 												<key>xPath</key>
-												<string>//a</string>
-												<key>attribute</key>
-												<string>href</string>
-												<key>regex</key>
-												<string>(\d+).html</string>
-											</dict>
-											<dict>
-												<key>xPath</key>
-												<string>//div/div[@class=&apos;class1&apos;]/a</string>
+												<string>//a | //div/div[@class=&apos;class1&apos;]/a</string>
 												<key>attribute</key>
 												<string>href</string>
 												<key>regex</key>
@@ -68,13 +60,7 @@
 										<array>
 											<dict>
 												<key>xPath</key>
-												<string>//a</string>
-												<key>attribute</key>
-												<string>title</string>
-											</dict>
-											<dict>
-												<key>xPath</key>
-												<string>//div/div[@class=&apos;class1&apos;]/a</string>
+												<string>//a | //div/div[@class=&apos;class1&apos;]/a</string>
 												<key>attribute</key>
 												<string>title</string>
 											</dict>
@@ -182,9 +168,20 @@
 															<array>
 																<dict>
 																	<key>xPath</key>
-																	<string>//a[2]</string>
-																	<key>regex</key>
-																	<string>\d+</string>
+                                                                    <string>//a[2]</string>
+                                                                    <key>regex</key>
+                                                                    <string>\d+,\d+</string>
+                                                                    <key>formats</key>
+                                                                    <array>
+                                                                        <dict>
+                                                                            <key>type</key>
+                                                                            <string>replace</string>
+                                                                            <key>regex</key>
+                                                                            <string>(\d+),(\d+)</string>
+                                                                            <key>format</key>
+                                                                            <string>$1.$2</string>
+                                                                        </dict>
+                                                                    </array>
 																</dict>
 															</array>
 														</dict>
@@ -216,6 +213,30 @@
                                                 <string>[^_]+_author_1_1</string>
                                                 <key>value</key>
                                                 <string>1</string>
+                                            </dict>
+                                        </array>
+                                    </dict>
+                                    <dict>
+                                        <key>name</key>
+                                        <string>text</string>
+                                        <key>result</key>
+                                        <array>
+                                            <dict>
+                                                <key>results</key>
+                                                <array>
+                                                    <dict>
+                                                        <key>xPath</key>
+                                                        <string>//div[@class='text']</string>
+                                                    </dict>
+                                                    <dict>
+                                                        <key>xPath</key>
+                                                        <string>//ul/li[1]</string>
+                                                        <key>attribute</key>
+                                                        <string>text</string>
+                                                    </dict>
+                                                </array>
+                                                <key>separator</key>
+                                                <string> + </string>
                                             </dict>
                                         </array>
                                     </dict>

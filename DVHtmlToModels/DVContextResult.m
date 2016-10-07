@@ -22,6 +22,8 @@
     }
 }
 
+#define SEPARATOR_DEFAULT @""
+
 #define XPATH_KEY @"xPath"
 #define ATTRIBUTE_KEY @"attribute"
 #define REGEX_KEY @"regex"
@@ -29,6 +31,8 @@
 #define DATA_KEY @"data"
 #define VALUE_KEY @"value"
 #define TEXT_TYPE_KEY @"textType"
+#define RESULTS_KEY @"results"
+#define SEPARATOR_KEY @"separator"
 - (instancetype)initWithData:(NSDictionary *)data {
     if (!data || (data.count <= 0)) {
         return nil;
@@ -56,6 +60,24 @@
         _object = [[DVContextObject alloc] initWithContext:data[DATA_KEY]];
         _value = data[VALUE_KEY];
         _textType = [self textTypeByString:data[TEXT_TYPE_KEY]];
+        
+        id resultsData = data[RESULTS_KEY];
+        if (resultsData && [resultsData isKindOfClass:[NSArray class]]) {
+            NSMutableArray<DVContextResult *> *array = [NSMutableArray array];
+            
+            for (NSDictionary *resultData in resultsData) {
+                DVContextResult *result = [[DVContextResult alloc] initWithData:resultData];
+                
+                if (result) {
+                    [array addObject:result];
+                }
+            }
+            
+            _results = (array.count > 0) ? [NSArray arrayWithArray:array] : nil;
+        }
+        
+        _separator = data[SEPARATOR_KEY];
+        if (!_separator) _separator = SEPARATOR_DEFAULT;
     }
     return self;
 }

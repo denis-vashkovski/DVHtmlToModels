@@ -17,6 +17,7 @@
 @property (nonatomic, strong) NSString *author;
 @property (nonatomic, strong) NSDate *createdAt;
 @property (nonatomic, strong) PriceObject *price;
+@property (nonatomic, strong) NSString *text;
 
 @property (nonatomic) BOOL isNew;
 @end

@@ -37,6 +37,15 @@
     }
     return result;
 }
+- (NSString *)dv_replacingWithPattern:(NSString *)pattern template:(NSString *)template error:(NSError **)error {
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern
+                                                                           options:NSRegularExpressionCaseInsensitive
+                                                                             error:error];
+    return [regex stringByReplacingMatchesInString:self
+                                           options:0
+                                             range:NSMakeRange(0, self.length)
+                                      withTemplate:template];
+}
 @end
 
 #pragma mark -
@@ -244,75 +253,27 @@
                         break;
                     }
                 } else {
-                    TFHppleElement *resultElement = [element searchWithXPathQuery:result.xPath].firstObject;
+                    id resultValue = nil;
                     
-                    if (resultElement) {
-                        NSString *resultValue = nil;
-                        
-                        if (valid(result.attribute)) {
-                            resultValue = [resultElement objectForKey:result.attribute];
-                        } else {
-                            switch (result.textType) {
-                                case DVTextTypeAll:
-                                    resultValue = [self removeRegexPattern:@"(<[^>]+>|\n|  +)" fromString:resultElement.raw];
-                                    break;
-                                case DVTextTypeRaw:
-                                    resultValue = [self removeRegexPattern:@"(^<[^>]+>|<[^>]+>$)" fromString:resultElement.raw];
-                                    break;
-                                default:
-                                    resultValue = resultElement.text;
-                                    break;
-                            }
-                        }
-                        
-                        if (resultValue) {
-                            if (valid(result.regex)) {
-                                resultValue = [self prepareRegexPattern:result.regex forString:resultValue];
-                            }
+                    if (valid(result.results)) {
+                        NSMutableArray<NSString *> *results = [NSMutableArray new];
+                        for (DVContextResult *subResult in result.results) {
+                            id subResultValue = [self resultValueWithDomElement:element resultObject:subResult fieldObject:field];
                             
-                            if (valid(resultValue)) {
-                                for (DVContextFormat *format in result.formats) {
-                                    BOOL executeFormat = YES;
-                                    for (DVContextCondition *condition in format.conditions) {
-                                        NSString *prepareString = [self prepareRegexPattern:condition.regex forString:resultValue];
-                                        
-                                        if (!valid(prepareString) && !condition.negative) {
-                                            executeFormat = NO;
-                                            break;
-                                        }
-                                    }
-                                    
-                                    if (executeFormat) {
-                                        switch (format.type) {
-                                            case DVContextFormatTypeDate:{
-                                                if ([[modelObject dv_getTypeClassOfPropertyByName:field.name] isSubclassOfClass:[NSDate class]]) {
-                                                    NSDateFormatter *df = [NSDateFormatter new];
-                                                    [df setDateFormat:format.format];
-                                                    
-                                                    [modelObject dv_setValue:[df dateFromString:resultValue] forPropertyName:field.name];
-                                                    resultValue = nil;
-                                                }
-                                                break;
-                                            }
-                                            default:{
-                                                resultValue = [NSString stringWithFormat:format.format, resultValue];
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    
-                                    if (!resultValue) break;
-                                }
-                                
-                                if (valid(resultValue)) {
-                                    if (valid(result.value)) {
-                                        resultValue = result.value;
-                                    }
-                                    [modelObject dv_setValue:resultValue forPropertyName:field.name];
-                                    break;
-                                }
+                            if (subResultValue && [subResultValue isKindOfClass:[NSString class]]) {
+                                [results addObject:subResultValue];
                             }
                         }
+                        
+                        if (results.count > 0) {
+                            resultValue = [results componentsJoinedByString:result.separator];
+                        }
+                    } else {
+                        resultValue = [self resultValueWithDomElement:element resultObject:result fieldObject:field];
+                    }
+                    
+                    if (resultValue) {
+                        [modelObject dv_setValue:resultValue forPropertyName:field.name];
                     }
                 }
             }
@@ -322,6 +283,90 @@
     }
     
     return (dataArray.count > 0) ? [NSArray arrayWithArray:dataArray] : nil;
+}
+
+- (id)resultValueWithDomElement:(TFHppleElement *)element
+                   resultObject:(DVContextResult *)result
+                    fieldObject:(DVContextField *)field {
+    TFHppleElement *resultElement = [element searchWithXPathQuery:result.xPath].firstObject;
+    
+    if (resultElement) {
+        NSString *resultValue = nil;
+        
+        if (valid(result.attribute)) {
+            resultValue = [resultElement objectForKey:result.attribute];
+        } else {
+            switch (result.textType) {
+                case DVTextTypeAll:
+                    resultValue = [self removeRegexPattern:@"(<[^>]+>|\n|  +)" fromString:resultElement.raw];
+                    break;
+                case DVTextTypeRaw:
+                    resultValue = [self removeRegexPattern:@"(^<[^>]+>|<[^>]+>$)" fromString:resultElement.raw];
+                    break;
+                default:
+                    resultValue = resultElement.text;
+                    break;
+            }
+        }
+        
+        if (resultValue) {
+            resultValue = [self removeRegexPattern:@"[\\n\\t]+" fromString:resultValue];
+            
+            if (valid(result.regex)) {
+                resultValue = [self prepareRegexPattern:result.regex forString:resultValue];
+            }
+            
+            if (valid(resultValue)) {
+                for (DVContextFormat *format in result.formats) {
+                    BOOL executeFormat = YES;
+                    for (DVContextCondition *condition in format.conditions) {
+                        NSString *prepareString = [self prepareRegexPattern:condition.regex forString:resultValue];
+                        
+                        if (!valid(prepareString) && !condition.negative) {
+                            executeFormat = NO;
+                            break;
+                        }
+                    }
+                    
+                    if (executeFormat) {
+                        switch (format.type) {
+                            case DVContextFormatTypeDate:{
+                                NSDateFormatter *df = [NSDateFormatter new];
+                                [df setDateFormat:format.format];
+                                
+                                return [df dateFromString:resultValue];
+                            }
+                            case DVContextFormatTypeReplace:{
+                                NSError *error = nil;
+                                resultValue = [resultValue dv_replacingWithPattern:format.regex template:format.format error:&error];
+                                
+                                if (error) {
+                                    NSLog(@"%@", error);
+                                }
+                                break;
+                            }
+                            default:{
+                                resultValue = [NSString stringWithFormat:format.format, resultValue];
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!resultValue) break;
+                }
+                
+                if (valid(resultValue)) {
+                    if (valid(result.value)) {
+                        resultValue = result.value;
+                    }
+                    
+                    return resultValue;
+                }
+            }
+        }
+    }
+    
+    return nil;
 }
 
 #pragma mark Utils
@@ -347,7 +392,7 @@
                ? (value && [value isKindOfClass:[NSArray class]] && [((NSArray *)value) count])
                : ([value isKindOfClass:[NSDictionary class]]
                   ? (value && [value isKindOfClass:[NSDictionary class]] && [((NSDictionary *)value) count])
-                  : NO)));
+                  : (value != nil))));
 }
 
 - (NSString *)preparedUrlWithParams:(NSArray<NSString *> *)parameters {
