@@ -267,6 +267,7 @@
                         
                         if (results.count > 0) {
                             resultValue = [results componentsJoinedByString:result.separator];
+                            resultValue = [self prepareFormating:result.formats forResultValue:resultValue];
                         }
                     } else {
                         resultValue = [self resultValueWithDomElement:element resultObject:result fieldObject:field];
@@ -317,43 +318,7 @@
             }
             
             if (valid(resultValue)) {
-                for (DVContextFormat *format in result.formats) {
-                    BOOL executeFormat = YES;
-                    for (DVContextCondition *condition in format.conditions) {
-                        NSString *prepareString = [self prepareRegexPattern:condition.regex forString:resultValue];
-                        
-                        if (!valid(prepareString) && !condition.negative) {
-                            executeFormat = NO;
-                            break;
-                        }
-                    }
-                    
-                    if (executeFormat) {
-                        switch (format.type) {
-                            case DVContextFormatTypeDate:{
-                                NSDateFormatter *df = [NSDateFormatter new];
-                                [df setDateFormat:format.format];
-                                
-                                return [df dateFromString:resultValue];
-                            }
-                            case DVContextFormatTypeReplace:{
-                                NSError *error = nil;
-                                resultValue = [resultValue dv_replacingWithPattern:format.regex template:format.format error:&error];
-                                
-                                if (error) {
-                                    NSLog(@"%@", error);
-                                }
-                                break;
-                            }
-                            default:{
-                                resultValue = [NSString stringWithFormat:format.format, resultValue];
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (!resultValue) break;
-                }
+                resultValue = [self prepareFormating:result.formats forResultValue:resultValue];
                 
                 if (valid(resultValue)) {
                     if (valid(result.value)) {
@@ -367,6 +332,48 @@
     }
     
     return nil;
+}
+
+- (id)prepareFormating:(NSArray<DVContextFormat *> *)formats forResultValue:(NSString *)resultValue {
+    for (DVContextFormat *format in formats) {
+        BOOL executeFormat = YES;
+        for (DVContextCondition *condition in format.conditions) {
+            NSString *prepareString = [self prepareRegexPattern:condition.regex forString:resultValue];
+            
+            if (!valid(prepareString) && !condition.negative) {
+                executeFormat = NO;
+                break;
+            }
+        }
+        
+        if (executeFormat) {
+            switch (format.type) {
+                case DVContextFormatTypeDate:{
+                    NSDateFormatter *df = [NSDateFormatter new];
+                    [df setDateFormat:format.format];
+                    
+                    return [df dateFromString:resultValue];
+                }
+                case DVContextFormatTypeReplace:{
+                    NSError *error = nil;
+                    resultValue = [resultValue dv_replacingWithPattern:format.regex template:format.format error:&error];
+                    
+                    if (error) {
+                        NSLog(@"%@", error);
+                    }
+                    break;
+                }
+                default:{
+                    resultValue = [NSString stringWithFormat:format.format, resultValue];
+                    break;
+                }
+            }
+        }
+        
+        if (!resultValue) break;
+    }
+    
+    return resultValue;
 }
 
 #pragma mark Utils
