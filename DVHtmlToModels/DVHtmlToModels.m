@@ -289,11 +289,10 @@
 - (id)resultValueWithDomElement:(TFHppleElement *)element
                    resultObject:(DVContextResult *)result
                     fieldObject:(DVContextField *)field {
-    TFHppleElement *resultElement = [element searchWithXPathQuery:result.xPath].firstObject;
+    NSString *resultValue = nil;
     
+    TFHppleElement *resultElement = [element searchWithXPathQuery:result.xPath].firstObject;
     if (resultElement) {
-        NSString *resultValue = nil;
-        
         if (valid(result.attribute)) {
             resultValue = [resultElement objectForKey:result.attribute];
         } else {
@@ -320,18 +319,14 @@
             if (valid(resultValue)) {
                 resultValue = [self prepareFormating:result.formats forResultValue:resultValue];
                 
-                if (valid(resultValue)) {
-                    if (valid(result.value)) {
-                        resultValue = result.value;
-                    }
-                    
-                    return resultValue;
+                if (valid(resultValue) && valid(result.value)) {
+                    resultValue = result.value;
                 }
             }
         }
     }
     
-    return nil;
+    return resultValue;
 }
 
 - (id)prepareFormating:(NSArray<DVContextFormat *> *)formats forResultValue:(NSString *)resultValue {
