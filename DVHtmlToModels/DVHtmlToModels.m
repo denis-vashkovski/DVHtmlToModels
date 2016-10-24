@@ -275,6 +275,7 @@
                     
                     if (resultValue) {
                         [modelObject dv_setValue:resultValue forPropertyName:field.name];
+                        break;
                     }
                 }
             }
@@ -310,18 +311,18 @@
         }
         
         if (resultValue) {
-            resultValue = [self removeRegexPattern:@"[\\n\\t]+" fromString:resultValue];
+            resultValue = [self removeRegexPattern:@"[\\n\\t\\r]+" fromString:resultValue];
             
             if (valid(result.regex)) {
                 resultValue = [self prepareRegexPattern:result.regex forString:resultValue];
             }
             
-            if (valid(resultValue)) {
+            if (valid(resultValue) && valid(result.formats)) {
                 resultValue = [self prepareFormating:result.formats forResultValue:resultValue];
-                
-                if (valid(resultValue) && valid(result.value)) {
-                    resultValue = result.value;
-                }
+            }
+            
+            if (valid(resultValue) && valid(result.value)) {
+                resultValue = result.value;
             }
         }
     }
@@ -335,7 +336,7 @@
         for (DVContextCondition *condition in format.conditions) {
             NSString *prepareString = [self prepareRegexPattern:condition.regex forString:resultValue];
             
-            if (!valid(prepareString) && !condition.negative) {
+            if (!(condition.negative ^ valid(prepareString))) {
                 executeFormat = NO;
                 break;
             }
