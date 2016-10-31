@@ -208,8 +208,17 @@
 - (NSDictionary *)loadDataWithUrlParameters:(NSArray<NSString *> *)parameters {
     if (!valid(_url)) return nil;
     
+    NSDate *currentTime = [NSDate date];
+    
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    NSData *htmlData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[self preparedUrlWithParams:parameters]]];
+    NSString *preparedUrlString = [self preparedUrlWithParams:parameters];
+    
+    NSLog(@"Start load html: %@", preparedUrlString);
+    NSData *htmlData = [NSData dataWithContentsOfURL:[NSURL URLWithString:preparedUrlString]];
+    NSLog(@"End load html, duration: %.0fms.", ABS(currentTime.timeIntervalSinceNow) * 1000);
+    
+    currentTime = [NSDate date];
+    
     TFHpple *htmlParser = [TFHpple hppleWithHTMLData:htmlData];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     
@@ -223,6 +232,8 @@
             [preparedData setObject:dataArray forKey:object.className];
         }
     }
+    
+    NSLog(@"End parse html, duration: %.0fms.", ABS(currentTime.timeIntervalSinceNow) * 1000);
     
     return preparedData.count > 0 ? [NSDictionary dictionaryWithDictionary:preparedData] : nil;
 }
