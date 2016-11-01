@@ -213,9 +213,10 @@
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     NSString *preparedUrlString = [self preparedUrlWithParams:parameters];
     
-    NSLog(@"Start load html: %@", preparedUrlString);
+    NSLog(@"DVHtmlToModels: Start load %@", preparedUrlString);
     NSData *htmlData = [NSData dataWithContentsOfURL:[NSURL URLWithString:preparedUrlString]];
-    NSLog(@"End load html, duration: %.0fms.", ABS(currentTime.timeIntervalSinceNow) * 1000);
+    NSTimeInterval loadDuration = ABS(currentTime.timeIntervalSinceNow) * 1000;
+    NSLog(@"DVHtmlToModels: End load, duration %.0fms.", loadDuration);
     
     currentTime = [NSDate date];
     
@@ -233,7 +234,9 @@
         }
     }
     
-    NSLog(@"End parse html, duration: %.0fms.", ABS(currentTime.timeIntervalSinceNow) * 1000);
+    NSTimeInterval parseDuration = ABS(currentTime.timeIntervalSinceNow) * 1000;
+    NSLog(@"DVHtmlToModels: End parse, duration %.0fms.", parseDuration);
+    NSLog(@"DVHtmlToModels: Total duration %.0fms.", (loadDuration + parseDuration));
     
     return preparedData.count > 0 ? [NSDictionary dictionaryWithDictionary:preparedData] : nil;
 }
