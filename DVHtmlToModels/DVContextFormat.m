@@ -15,6 +15,8 @@
         return DVContextFormatTypeDate;
     } else if ([typeStr isEqualToString:@"replace"]) {
         return DVContextFormatTypeReplace;
+    } else if ([typeStr isEqualToString:@"encoding"]) {
+        return DVContextFormatTypeEncoding;
     } else {
         return DVContextFormatTypeDefault;
     }

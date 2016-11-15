@@ -13,7 +13,8 @@
 typedef enum {
     DVContextFormatTypeDefault,
     DVContextFormatTypeDate,
-    DVContextFormatTypeReplace
+    DVContextFormatTypeReplace,
+    DVContextFormatTypeEncoding
 } DVContextFormatType;
 
 @interface DVContextFormat : NSObject

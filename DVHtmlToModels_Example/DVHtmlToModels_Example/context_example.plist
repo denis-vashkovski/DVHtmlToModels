@@ -99,7 +99,14 @@
 												<key>xPath</key>
 												<string>//div/div[@class=&apos;class1&apos;]/a/img</string>
 												<key>attribute</key>
-												<string>src</string>
+                                                <string>src</string>
+                                                <key>formats</key>
+                                                <array>
+                                                    <dict>
+                                                        <key>type</key>
+                                                        <string>encoding</string>
+                                                    </dict>
+                                                </array>
 											</dict>
 										</array>
 									</dict>

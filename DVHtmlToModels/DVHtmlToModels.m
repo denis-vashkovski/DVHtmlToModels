@@ -373,6 +373,10 @@
                     }
                     break;
                 }
+                case DVContextFormatTypeEncoding:{
+                    resultValue = [resultValue stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+                    break;
+                }
                 default:{
                     resultValue = [NSString stringWithFormat:format.format, resultValue];
                     break;
