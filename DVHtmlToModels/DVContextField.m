@@ -8,18 +8,16 @@
 
 #import "DVContextField.h"
 
+static NSString * const DVContextFieldNameKey = @"name";
+static NSString * const DVContextFieldResultKey = @"result";
+
 @implementation DVContextField
 
-#define NAME_KEY @"name"
-#define RESULT_KEY @"result"
 - (instancetype)initWithData:(NSDictionary *)data {
-    if (!data || (data.count <= 0)) {
-        return nil;
-    }
-    if (self = [super init]) {
-        _name = data[NAME_KEY];
+    if ((self = [super init]) && data.count) {
+        _name = data[DVContextFieldNameKey];
         
-        id resultsData = data[RESULT_KEY];
+        id resultsData = data[DVContextFieldResultKey];
         if (resultsData && [resultsData isKindOfClass:[NSArray class]]) {
             NSMutableArray<DVContextResult *> *array = [NSMutableArray array];
             
@@ -31,7 +29,7 @@
                 }
             }
             
-            _result = (array.count > 0) ? [NSArray arrayWithArray:array] : nil;
+            _result = (array.count > 0) ? array.copy : nil;
         }
     }
     return self;
@@ -40,8 +38,8 @@
 - (NSString *)description {
     return [NSString stringWithFormat:
             @"name: %@\nresults: %@",
-            _name,
-            _result];
+            self.name,
+            self.result];
 }
 
 @end

@@ -10,10 +10,6 @@
 
 #import "ProductObject.h"
 
-@interface ProductsTVC ()
-
-@end
-
 @implementation ProductsTVC
 
 - (void)viewDidLoad {
@@ -30,7 +26,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 210.;
+    return 250.;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {

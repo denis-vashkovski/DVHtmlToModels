@@ -8,21 +8,20 @@
 
 #import "DVContextObject.h"
 
+static NSString * const DVContextObjectXPathRootKey = @"xPathRoot";
+static NSString * const DVContextObjectClassNameKey = @"className";
+static NSString * const DVContextObjectFieldsKey = @"fields";
+
 @implementation DVContextObject
 
-#define XPATH_ROOT_KEY @"xPathRoot"
-#define CLASS_NAME_KEY @"className"
-#define FIELDS_KEY @"fields"
 - (instancetype)initWithContext:(NSDictionary *)context {
-    if (!context || (context.count <= 0)) {
-        return nil;
-    }
-    if (self = [super init]) {
-        _xPathRoot = context[XPATH_ROOT_KEY];
-        _className = context[CLASS_NAME_KEY];
+    if ((self = [super init]) && context.count) {
+        _xPathRoot = context[DVContextObjectXPathRootKey];
+        _className = context[DVContextObjectClassNameKey];
+        
         NSAssert((_className && (_className.length > 0)), @"ClassName can't be blank");
         
-        id fieldsData = context[FIELDS_KEY];
+        id fieldsData = context[DVContextObjectFieldsKey];
         if (fieldsData && [fieldsData isKindOfClass:[NSArray class]]) {
             NSMutableArray<DVContextField *> *array = [NSMutableArray array];
             
@@ -34,7 +33,7 @@
                 }
             }
             
-            _fields = (array.count > 0) ? [NSArray arrayWithArray:array] : nil;
+            _fields = (array.count > 0) ? array.copy : nil;
         }
     }
     return self;
@@ -43,9 +42,9 @@
 - (NSString *)description {
     return [NSString stringWithFormat:
             @"xPathRoot: %@ \n className: %@ \n fields: %@",
-            _xPathRoot,
-            _className,
-            _fields];
+            self.xPathRoot,
+            self.className,
+            self.fields];
 }
 
 @end

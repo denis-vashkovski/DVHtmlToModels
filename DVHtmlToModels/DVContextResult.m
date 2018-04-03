@@ -10,6 +10,18 @@
 
 #import "DVContextObject.h"
 
+static NSString * const DVContextResultXPathKey = @"xPath";
+static NSString * const DVContextResultAttributeKey = @"attribute";
+static NSString * const DVContextResultRegexKey = @"regex";
+static NSString * const DVContextResultFormatsKey = @"formats";
+static NSString * const DVContextResultDataKey = @"data";
+static NSString * const DVContextResultValueKey = @"value";
+static NSString * const DVContextResultTextTypeKey = @"textType";
+static NSString * const DVContextResultResultsKey = @"results";
+static NSString * const DVContextResultSeparatorKey = @"separator";
+
+static NSString * const DVContextResultSeparatorDefault = @"";
+
 @implementation DVContextResult
 
 - (DVTextType)textTypeByString:(NSString *)string {
@@ -22,27 +34,13 @@
     }
 }
 
-#define SEPARATOR_DEFAULT @""
-
-#define XPATH_KEY @"xPath"
-#define ATTRIBUTE_KEY @"attribute"
-#define REGEX_KEY @"regex"
-#define FORMATS_KEY @"formats"
-#define DATA_KEY @"data"
-#define VALUE_KEY @"value"
-#define TEXT_TYPE_KEY @"textType"
-#define RESULTS_KEY @"results"
-#define SEPARATOR_KEY @"separator"
 - (instancetype)initWithData:(NSDictionary *)data {
-    if (!data || (data.count <= 0)) {
-        return nil;
-    }
-    if (self = [super init]) {
-        _xPath = data[XPATH_KEY];
-        _attribute = data[ATTRIBUTE_KEY];
-        _regex = data[REGEX_KEY];
+    if ((self = [super init]) && data.count) {
+        _xPath = data[DVContextResultXPathKey];
+        _attribute = data[DVContextResultAttributeKey];
+        _regex = data[DVContextResultRegexKey];
         
-        id formatsData = data[FORMATS_KEY];
+        id formatsData = data[DVContextResultFormatsKey];
         if (formatsData && [formatsData isKindOfClass:[NSArray class]]) {
             NSMutableArray<DVContextFormat *> *array = [NSMutableArray array];
             
@@ -54,14 +52,18 @@
                 }
             }
             
-            _formats = (array.count > 0) ? [NSArray arrayWithArray:array] : nil;
+            _formats = (array.count > 0) ? array.copy : nil;
         }
         
-        _object = [[DVContextObject alloc] initWithContext:data[DATA_KEY]];
-        _value = data[VALUE_KEY];
-        _textType = [self textTypeByString:data[TEXT_TYPE_KEY]];
+        id contextResultData = data[DVContextResultDataKey];
+        if (contextResultData) {
+            _object = [[DVContextObject alloc] initWithContext:contextResultData];
+        }
         
-        id resultsData = data[RESULTS_KEY];
+        _value = data[DVContextResultValueKey];
+        _textType = [self textTypeByString:data[DVContextResultTextTypeKey]];
+        
+        id resultsData = data[DVContextResultResultsKey];
         if (resultsData && [resultsData isKindOfClass:[NSArray class]]) {
             NSMutableArray<DVContextResult *> *array = [NSMutableArray array];
             
@@ -73,27 +75,27 @@
                 }
             }
             
-            _results = (array.count > 0) ? [NSArray arrayWithArray:array] : nil;
+            _results = (array.count > 0) ? array.copy : nil;
         }
         
-        _separator = data[SEPARATOR_KEY];
-        if (!_separator) _separator = SEPARATOR_DEFAULT;
+        _separator = data[DVContextResultSeparatorKey];
+        if (!_separator) _separator = DVContextResultSeparatorDefault;
     }
     return self;
 }
 
 - (BOOL)isObject {
-    return _object;
+    return self.object != nil;
 }
 
 - (NSString *)description {
     return [NSString stringWithFormat:
             @"xPath: %@\nattribute: %@\nregex: %@\nformats: %@\nobject: %@",
-            _xPath,
-            _attribute,
-            _regex,
-            _formats,
-            _object];
+            self.xPath,
+            self.attribute,
+            self.regex,
+            self.formats,
+            self.object];
 }
 
 @end

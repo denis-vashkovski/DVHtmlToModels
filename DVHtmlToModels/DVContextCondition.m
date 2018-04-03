@@ -8,17 +8,15 @@
 
 #import "DVContextCondition.h"
 
+static NSString * const DVContextConditionRegexKey = @"regex";
+static NSString * const DVContextConditionNegativeKey = @"negative";
+
 @implementation DVContextCondition
 
-#define REGEX_KEY @"regex"
-#define NEGATIVE_KEY @"negative"
 - (instancetype)initWithData:(NSDictionary *)data {
-    if (!data || (data.count <= 0)) {
-        return nil;
-    }
-    if (self = [super init]) {
-        _regex = data[REGEX_KEY];
-        _negative = [data[NEGATIVE_KEY] boolValue];
+    if ((self = [super init]) && data.count) {
+        _regex = data[DVContextConditionRegexKey];
+        _negative = [data[DVContextConditionNegativeKey] boolValue];
     }
     return self;
 }
@@ -26,8 +24,8 @@
 - (NSString *)description {
     return [NSString stringWithFormat:
             @"regex: %@\nnegative: %@",
-            _regex,
-            (_negative ? @"true" : @"false")];
+            self.regex,
+            (self.negative ? @"true" : @"false")];
 }
 
 @end

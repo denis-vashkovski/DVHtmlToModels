@@ -8,6 +8,11 @@
 
 #import "DVContextFormat.h"
 
+static NSString * const DVContextFormatTypeKey = @"type";
+static NSString * const DVContextFormatConditionsKey = @"conditions";
+static NSString * const DVContextFormatRegexKey = @"regex";
+static NSString * const DVContextFormatFormatKey = @"format";
+
 @implementation DVContextFormat
 
 - (DVContextFormatType)typeByString:(NSString *)typeStr {
@@ -22,18 +27,11 @@
     }
 }
 
-#define TYPE_KEY @"type"
-#define CONDITIONS_KEY @"conditions"
-#define REGEX_KEY @"regex"
-#define FORMAT_KEY @"format"
 - (instancetype)initWithData:(NSDictionary *)data {
-    if (!data || (data.count <= 0)) {
-        return nil;
-    }
-    if (self = [super init]) {
-        _type = [self typeByString:data[TYPE_KEY]];
+    if ((self = [super init]) && data.count) {
+        _type = [self typeByString:data[DVContextFormatTypeKey]];
         
-        id conditionsData = data[CONDITIONS_KEY];
+        id conditionsData = data[DVContextFormatConditionsKey];
         if (conditionsData && [conditionsData isKindOfClass:[NSArray class]]) {
             NSMutableArray<DVContextCondition *> *array = [NSMutableArray array];
             
@@ -45,11 +43,11 @@
                 }
             }
             
-            _conditions = (array.count > 0) ? [NSArray arrayWithArray:array] : nil;
+            _conditions = (array.count > 0) ? array.copy : nil;
         }
         
-        _regex = data[REGEX_KEY];
-        _format = data[FORMAT_KEY];
+        _regex = data[DVContextFormatRegexKey];
+        _format = data[DVContextFormatFormatKey];
     }
     return self;
 }
@@ -57,8 +55,8 @@
 - (NSString *)description {
     return [NSString stringWithFormat:
             @"conditions: %@\nformat: %@",
-            _conditions,
-            _format];
+            self.conditions,
+            self.format];
 }
 
 @end

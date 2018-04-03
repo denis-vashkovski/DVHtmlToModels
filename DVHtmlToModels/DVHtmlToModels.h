@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void (^DVHtmlToModelsCompletionBlock)(NSDictionary *data, NSData *htmlData);
+
 @interface DVHtmlToModels : NSObject
 + (instancetype) alloc __attribute__((unavailable("alloc not available, call initWithContextByName: instead")));
 - (instancetype) init __attribute__((unavailable("init not available, call initWithContextByName: instead")));
@@ -21,8 +23,9 @@
 - (instancetype)initWithContextOfFile:(NSString *)path;
 - (instancetype)initWithContext:(NSDictionary *)context;
 
-@property (nonatomic, strong, readonly) NSString *url;
+@property (nonatomic, copy, readonly) NSString *url;
 
-- (NSDictionary *)loadDataWithUrlParameters:(NSArray<NSString *> *)parameters;
-- (NSDictionary *)loadData;
+- (void)loadDataWithUrlParameters:(NSArray<NSString *> *)parameters
+                completionHandler:(DVHtmlToModelsCompletionBlock)completionHandler;
+- (void)loadDataWithCompletionHandler:(DVHtmlToModelsCompletionBlock)completionHandler;
 @end

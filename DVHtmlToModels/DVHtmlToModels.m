@@ -205,44 +205,59 @@
     return self;
 }
 
-- (NSDictionary *)loadDataWithUrlParameters:(NSArray<NSString *> *)parameters {
-    if (!valid(_url)) return nil;
-    
-    NSDate *currentTime = [NSDate date];
-    
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    NSString *preparedUrlString = [self preparedUrlWithParams:parameters];
-    
-    NSLog(@"DVHtmlToModels: Start load %@", preparedUrlString);
-    NSData *htmlData = [NSData dataWithContentsOfURL:[NSURL URLWithString:preparedUrlString]];
-    NSTimeInterval loadDuration = ABS(currentTime.timeIntervalSinceNow) * 1000;
-    NSLog(@"DVHtmlToModels: End load, duration %.0fms.", loadDuration);
-    
-    currentTime = [NSDate date];
-    
-    TFHpple *htmlParser = [TFHpple hppleWithHTMLData:htmlData];
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    
-    if (!htmlParser) return nil;
-    
-    NSMutableDictionary<NSString *, NSArray *> *preparedData = [NSMutableDictionary new];
-    for (DVContextObject *object in _objects) {
-        NSArray *dataArray = [self prepareContextObject:object parser:htmlParser];
-        
-        if (valid(dataArray)) {
-            [preparedData setObject:dataArray forKey:object.className];
+- (void)loadDataWithUrlParameters:(NSArray<NSString *> *)parameters
+                completionHandler:(DVHtmlToModelsCompletionBlock)completionHandler {
+    if (!valid(self.url)) {
+        if (completionHandler) {
+            completionHandler(nil, nil);
         }
+        return;
     }
     
-    NSTimeInterval parseDuration = ABS(currentTime.timeIntervalSinceNow) * 1000;
-    NSLog(@"DVHtmlToModels: End parse, duration %.0fms.", parseDuration);
-    NSLog(@"DVHtmlToModels: Total duration %.0fms.", (loadDuration + parseDuration));
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     
-    return preparedData.count > 0 ? [NSDictionary dictionaryWithDictionary:preparedData] : nil;
+    [[NSOperationQueue new] addOperationWithBlock:^{
+        NSDate *currentTime = [NSDate date];
+        NSString *preparedUrlString = [self preparedUrlWithParams:parameters];
+        
+        NSLog(@"DVHtmlToModels: Start load %@", preparedUrlString);
+        NSData *htmlData = [NSData dataWithContentsOfURL:[NSURL URLWithString:preparedUrlString]];
+        NSTimeInterval loadDuration = ABS(currentTime.timeIntervalSinceNow) * 1000;
+        NSLog(@"DVHtmlToModels: End load, duration %.0fms.", loadDuration);
+        
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+        }];
+        
+        currentTime = [NSDate date];
+        
+        TFHpple *htmlParser = [TFHpple hppleWithHTMLData:htmlData];
+        
+        if (htmlParser) {
+            NSMutableDictionary<NSString *, NSArray *> *preparedData = [NSMutableDictionary new];
+            for (DVContextObject *object in self.objects) {
+                NSArray *dataArray = [self prepareContextObject:object parser:htmlParser];
+                
+                if (valid(dataArray)) {
+                    [preparedData setObject:dataArray forKey:object.className];
+                }
+            }
+            
+            NSTimeInterval parseDuration = ABS(currentTime.timeIntervalSinceNow) * 1000;
+            NSLog(@"DVHtmlToModels: End parse, duration %.0fms.", parseDuration);
+            NSLog(@"DVHtmlToModels: Total duration %.0fms.", (loadDuration + parseDuration));
+            
+            if (completionHandler) {
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    completionHandler((preparedData.count > 0 ? preparedData.copy : nil), htmlData);
+                }];
+            }
+        }
+    }];
 }
 
-- (NSDictionary *)loadData {
-    return [self loadDataWithUrlParameters:nil];
+- (void)loadDataWithCompletionHandler:(DVHtmlToModelsCompletionBlock)completionHandler {
+    [self loadDataWithUrlParameters:nil completionHandler:completionHandler];
 }
 
 - (NSArray *)prepareContextObject:(DVContextObject *)object parser:(id)parser {

@@ -14,20 +14,39 @@
 #import "ProductsTVC.h"
 
 @interface SectionsTVC ()
-@property(nonatomic, strong) NSArray<SectionObject *> *sections;
-@property(nonatomic, strong) NSIndexPath *selectedIndexPath;
+@property (nonatomic, strong) UIActivityIndicatorView *activityIndicatorView;
+@property (nonatomic, strong) NSArray<SectionObject *> *sections;
+@property (nonatomic, strong) NSIndexPath *selectedIndexPath;
 @end
 
 @implementation SectionsTVC
 
+- (UIActivityIndicatorView *)activityIndicatorView {
+    if (!_activityIndicatorView) {
+        _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+        _activityIndicatorView.color = [UIColor grayColor];
+        _activityIndicatorView.hidesWhenStopped = YES;
+        _activityIndicatorView.center = self.tableView.center;
+        
+        self.tableView.backgroundView = _activityIndicatorView;
+    }
+    return _activityIndicatorView;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    DVHtmlToModels *htmlToModels = [DVHtmlToModels htmlToModelsWithContextByName:@"context_example"];
-    NSDictionary *data = [htmlToModels loadData];
-    if (data) {
-        self.sections = data[NSStringFromClass([SectionObject class])];
-    }
+    [self.activityIndicatorView startAnimating];
+    
+    [[DVHtmlToModels htmlToModelsWithContextByName:@"context_example"] loadDataWithCompletionHandler:
+     ^(NSDictionary *data, NSData *htmlData) {
+         if (data) {
+             self.sections = data[NSStringFromClass([SectionObject class])];
+             [self.tableView reloadData];
+         }
+         
+         [self.activityIndicatorView stopAnimating];
+     }];
 }
 
 #pragma mark - Table view data source
