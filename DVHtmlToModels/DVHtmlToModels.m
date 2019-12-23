@@ -11,7 +11,7 @@
 #import "DVContextObject.h"
 
 #import <UIKit/UIKit.h>
-#import <TFHpple.h>
+#import <hpple/TFHpple.h>
 #import <objc/runtime.h>
 
 #pragma mark -
@@ -105,6 +105,11 @@
 }
 
 - (void)dv_setValue:(id)value forPropertyName:(NSString *)propertyName {
+    if ([self isKindOfClass:[NSMutableDictionary class]]) {
+        [((NSMutableDictionary *)self) setObject:value forKey:propertyName];
+        return;
+    }
+    
     if (![self dv_hasPropertyByName:propertyName]) {
         return;
     }
@@ -205,8 +210,10 @@
     return self;
 }
 
-- (void)loadDataWithUrlParameters:(NSArray<NSString *> *)parameters
-                completionHandler:(DVHtmlToModelsCompletionBlock)completionHandler {
+- (void)loadDataWithReplacingURLParameters:(NSArray<NSString *> *)replacingURLParameters
+                        queryURLParameters:(NSDictionary *)queryURLParameters
+                                    asJSON:(BOOL)asJSON
+                         completionHandler:(DVHtmlToModelsCompletionBlock)completionHandler {
     if (!valid(self.url)) {
         if (completionHandler) {
             completionHandler(nil, nil);
@@ -214,20 +221,18 @@
         return;
     }
     
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    
     [[NSOperationQueue new] addOperationWithBlock:^{
         NSDate *currentTime = [NSDate date];
-        NSString *preparedUrlString = [self preparedUrlWithParams:parameters];
+        
+        NSString *preparedUrlString = [self preparedUrlWithReplacingParameters:replacingURLParameters];
+        if (valid(queryURLParameters)) {
+            preparedUrlString = [self preparedUrlWithQueryParameters:queryURLParameters];
+        }
         
         NSLog(@"DVHtmlToModels: Start load %@", preparedUrlString);
         NSData *htmlData = [NSData dataWithContentsOfURL:[NSURL URLWithString:preparedUrlString]];
         NSTimeInterval loadDuration = ABS(currentTime.timeIntervalSinceNow) * 1000;
         NSLog(@"DVHtmlToModels: End load, duration %.0fms.", loadDuration);
-        
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-        }];
         
         currentTime = [NSDate date];
         
@@ -236,7 +241,9 @@
         if (htmlParser) {
             NSMutableDictionary<NSString *, NSArray *> *preparedData = [NSMutableDictionary new];
             for (DVContextObject *object in self.objects) {
-                NSArray *dataArray = [self prepareContextObject:object parser:htmlParser];
+                NSArray *dataArray = [self prepareContextObject:object
+                                                         parser:htmlParser
+                                                     asJSONData:asJSON];
                 
                 if (valid(dataArray)) {
                     [preparedData setObject:dataArray forKey:object.className];
@@ -257,24 +264,38 @@
 }
 
 - (void)loadDataWithCompletionHandler:(DVHtmlToModelsCompletionBlock)completionHandler {
-    [self loadDataWithUrlParameters:nil completionHandler:completionHandler];
+    [self loadDataWithReplacingURLParameters:nil
+                          queryURLParameters:nil
+                                      asJSON:NO
+                           completionHandler:completionHandler];
 }
 
-- (NSArray *)prepareContextObject:(DVContextObject *)object parser:(id)parser {
+- (NSArray *)prepareContextObject:(DVContextObject *)object
+                           parser:(id)parser
+                       asJSONData:(BOOL)asJSONData {
+    
     NSArray<TFHppleElement *> *elements = valid(object.xPathRoot) ? [parser searchWithXPathQuery:object.xPathRoot] : nil;
     if (!valid(elements)) return nil;
     
     NSMutableArray *dataArray = [NSMutableArray new];
     for (TFHppleElement *element in elements) {
-        id modelObject = [objc_getClass(object.className.UTF8String) new];
+        id modelObject = (asJSONData
+                          ? [NSMutableDictionary new]
+                          : [objc_getClass(object.className.UTF8String) new]);
         
         for (DVContextField *field in object.fields) {
             for (DVContextResult *result in field.result) {
                 if (result.object) {
-                    id valueObjectArray = [self prepareContextObject:result.object parser:element];
+                    NSArray *valueObjectArray = [self prepareContextObject:result.object
+                                                                    parser:element
+                                                                asJSONData:asJSONData];
+                    
                     if (valid(valueObjectArray)) {
-                        if (![[modelObject dv_getTypeClassOfPropertyByName:field.name] isSubclassOfClass:[NSArray class]]) {
-                            valueObjectArray = ((NSArray *)valueObjectArray).firstObject;
+                        if (!asJSONData) {
+                            Class propertyClass = [modelObject dv_getTypeClassOfPropertyByName:field.name];
+                            if (![propertyClass isSubclassOfClass:[NSArray class]]) {
+                                valueObjectArray = ((NSArray *)valueObjectArray).firstObject;
+                            }
                         }
                         
                         [modelObject dv_setValue:valueObjectArray forPropertyName:field.name];
@@ -310,16 +331,20 @@
             }
         }
         
+        if (asJSONData) {
+            modelObject = ((NSMutableDictionary *)modelObject).copy;
+        }
+        
         [dataArray addObject:modelObject];
     }
     
-    return (dataArray.count > 0) ? [NSArray arrayWithArray:dataArray] : nil;
+    return (dataArray.count > 0) ? dataArray.copy : nil;
 }
 
 - (id)resultValueWithDomElement:(TFHppleElement *)element
                    resultObject:(DVContextResult *)result
                     fieldObject:(DVContextField *)field {
-    NSString *resultValue = nil;
+    id resultValue = nil;
     
     TFHppleElement *resultElement = [element searchWithXPathQuery:result.xPath].firstObject;
     if (resultElement) {
@@ -361,17 +386,17 @@
 
 - (id)prepareFormating:(NSArray<DVContextFormat *> *)formats forResultValue:(NSString *)resultValue {
     for (DVContextFormat *format in formats) {
-        BOOL executeFormat = YES;
+        BOOL needToExecuteFormat = YES;
         for (DVContextCondition *condition in format.conditions) {
             NSString *prepareString = [self prepareRegexPattern:condition.regex forString:resultValue];
             
             if (!(condition.negative ^ valid(prepareString))) {
-                executeFormat = NO;
+                needToExecuteFormat = NO;
                 break;
             }
         }
         
-        if (executeFormat) {
+        if (needToExecuteFormat) {
             switch (format.type) {
                 case DVContextFormatTypeDate:{
                     NSDateFormatter *df = [NSDateFormatter new];
@@ -431,8 +456,8 @@
                   : (value != nil))));
 }
 
-- (NSString *)preparedUrlWithParams:(NSArray<NSString *> *)parameters {
-    NSString *preparedUrl = [NSString stringWithFormat:@"%@", _url];
+- (NSString *)preparedUrlWithReplacingParameters:(NSArray<NSString *> *)parameters {
+    NSString *preparedUrl = [NSString stringWithFormat:@"%@", self.url];
     
     if (valid(preparedUrl) && valid(parameters)) {
         for (NSString *parameter in parameters) {
@@ -444,6 +469,58 @@
     }
     
     return preparedUrl;
+}
+
+- (NSString *)preparedUrlWithQueryParameters:(NSDictionary *)parameters {
+    NSMutableString *preparedUrl = self.url.mutableCopy;
+    
+    if (parameters && parameters.count > 0) {
+        BOOL first = YES;
+        for (NSString *key in parameters) {
+            [preparedUrl appendString:(first ? @"?" : @"&")];
+            [preparedUrl appendString:[self prepareParameterWithKey:key value:parameters[key]]];
+            first = NO;
+        }
+    }
+    
+    return preparedUrl.copy;
+}
+
+- (NSString *)prepareParameterWithKey:(NSString *)key value:(id)value {
+    if (!valid(key) || !value) {
+        return nil;
+    }
+    
+    NSMutableString *parameter = [NSMutableString new];
+    
+    if ([value isKindOfClass:[NSArray class]]) {
+        NSArray *valueArray = (NSArray *)value;
+        if (!valueArray.count) {
+            valueArray = @[ @"" ];
+        }
+        
+        NSString *preparedKey = [key stringByAppendingString:@"[]"];
+        for (NSString *v in valueArray) {
+            [parameter appendString:[self prepareParameterWithKey:preparedKey value:v]];
+            [parameter appendString:@"&"];
+        }
+        
+        return [parameter substringToIndex:(parameter.length - 1)];
+    }
+    
+    [parameter appendString:key.dv_encodeForUrl];
+    [parameter appendString:@"="];
+    
+    NSString *parameterValueStr = @"";
+    if ([value isKindOfClass:[NSString class]]) {
+        parameterValueStr = value;
+    } else if ([value isKindOfClass:[NSNumber class]]) {
+        parameterValueStr = ((NSNumber *)value).stringValue;
+    }
+    
+    [parameter appendString:[parameterValueStr dv_encodeForUrl]];
+    
+    return parameter;
 }
 
 - (NSString *)removeRegexPattern:(NSString *)pattern fromString:(NSString *)string {

@@ -38,15 +38,20 @@
     
     [self.activityIndicatorView startAnimating];
     
-    [[DVHtmlToModels htmlToModelsWithContextByName:@"context_example"] loadDataWithCompletionHandler:
+    DVHtmlToModels *htmlToModels = [DVHtmlToModels htmlToModelsWithContextByName:@"context_example"];
+    [htmlToModels loadDataWithReplacingURLParameters:nil
+                                  queryURLParameters:nil
+                                              asJSON:NO
+                                   completionHandler:
      ^(NSDictionary *data, NSData *htmlData) {
-         if (data) {
-             self.sections = data[NSStringFromClass([SectionObject class])];
-             [self.tableView reloadData];
-         }
-         
-         [self.activityIndicatorView stopAnimating];
-     }];
+
+        if (data) {
+            self.sections = data[NSStringFromClass([SectionObject class])];
+            [self.tableView reloadData];
+        }
+
+        [self.activityIndicatorView stopAnimating];
+    }];
 }
 
 #pragma mark - Table view data source

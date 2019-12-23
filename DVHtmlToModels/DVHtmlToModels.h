@@ -25,7 +25,10 @@ typedef void (^DVHtmlToModelsCompletionBlock)(NSDictionary *data, NSData *htmlDa
 
 @property (nonatomic, copy, readonly) NSString *url;
 
-- (void)loadDataWithUrlParameters:(NSArray<NSString *> *)parameters
-                completionHandler:(DVHtmlToModelsCompletionBlock)completionHandler;
+- (void)loadDataWithReplacingURLParameters:(NSArray<NSString *> *)replacingURLParameters
+                        queryURLParameters:(NSDictionary *)queryURLParameters
+                                    asJSON:(BOOL)asJSON
+                         completionHandler:(DVHtmlToModelsCompletionBlock)completionHandler;
+
 - (void)loadDataWithCompletionHandler:(DVHtmlToModelsCompletionBlock)completionHandler;
 @end
