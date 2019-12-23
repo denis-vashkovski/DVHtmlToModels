@@ -6,6 +6,7 @@ Pod::Spec.new do |s|
   s.license             = { :type => 'MIT', :file => 'LICENSE' }
   s.authors             = { 'Denis Vashkovski' => 'denis.vashkovski.vv@gmail.com' }
   s.source              = { :git => 'https://github.com/denis-vashkovski/DVHtmlToModels.git', :tag => s.version.to_s }
+  s.platform            = :ios, "7.1"
   s.ios.source_files    = 'DVHtmlToModels/*.{h,m}'
   s.requires_arc        = true
 end
