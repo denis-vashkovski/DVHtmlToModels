@@ -22,6 +22,8 @@ static NSString * const DVContextFormatFormatKey = @"format";
         return DVContextFormatTypeReplace;
     } else if ([typeStr isEqualToString:@"encoding"]) {
         return DVContextFormatTypeEncoding;
+    } else if ([typeStr isEqualToString:@"number"]) {
+        return DVContextFormatTypeNumber;
     } else {
         return DVContextFormatTypeDefault;
     }
